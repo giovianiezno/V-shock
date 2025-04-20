@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -81,21 +42,16 @@
             align-items: center;
         }
 
-        .logo-placeholder {
+        .logo {
             width: 120px;
             height: 120px;
-            background: #1a1a1a;
-            border: 2px solid #00B7EB;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-size: 16px;
-            font-weight: 300;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            object-fit: contain;
+            transition: transform 0.3s ease, -webkit-transform 0.3s ease, box-shadow 0.3s ease;
+            will-change: transform;
         }
 
-        .logo-placeholder:hover {
+        .logo:hover {
+            -webkit-transform: scale(1.05);
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(0, 183, 235, 0.5);
         }
@@ -111,11 +67,13 @@
             font-size: 1.2rem;
             font-weight: 400;
             padding: 5px 10px;
-            transition: color 0.3s ease, transform 0.3s ease, text-shadow 0.3s ease;
+            transition: color 0.3s ease, -webkit-transform 0.3s ease, transform 0.3s ease, text-shadow 0.3s ease;
+            will-change: transform;
         }
 
         .nav-links a:hover, .nav-links a:focus {
             color: #00B7EB;
+            -webkit-transform: scale(1.1);
             transform: scale(1.1);
             text-shadow: 0 0 10px rgba(0, 183, 235, 0.7);
         }
@@ -138,7 +96,9 @@
             width: 100%;
             height: 100%;
             background: radial-gradient(circle, rgba(0, 183, 235, 0.1) 0%, transparent 70%);
+            -webkit-animation: pulse 8s infinite;
             animation: pulse 8s infinite;
+            will-change: opacity;
         }
 
         h1 {
@@ -150,7 +110,9 @@
             overflow: hidden;
             white-space: nowrap;
             border-right: 4px solid #00B7EB;
+            -webkit-animation: typing 2s steps(20, end), blink-caret 0.5s step-end infinite;
             animation: typing 2s steps(20, end), blink-caret 0.5s step-end infinite;
+            will-change: width, border-color;
         }
 
         .section {
@@ -188,8 +150,9 @@
             border-radius: 12px;
             text-align: center;
             position: relative;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease, -webkit-transform 0.3s ease, box-shadow 0.3s ease;
             opacity: 0;
+            will-change: transform, opacity;
         }
 
         .engine-card::before {
@@ -202,16 +165,20 @@
             border: 2px solid #00B7EB;
             border-radius: 12px;
             opacity: 0;
+            -webkit-animation: glow 2s infinite;
             animation: glow 2s infinite;
         }
 
         .engine-card.visible {
             opacity: 1;
+            -webkit-transform: translateY(0);
             transform: translateY(0);
+            -webkit-animation: slideIn 0.8s ease-out;
             animation: slideIn 0.8s ease-out;
         }
 
         .engine-card:hover {
+            -webkit-transform: translateY(-10px);
             transform: translateY(-10px);
             box-shadow: 0 0 25px rgba(0, 183, 235, 0.7);
         }
@@ -236,10 +203,12 @@
             border-left: 4px solid #00B7EB;
             border-radius: 8px;
             opacity: 0;
+            will-change: opacity;
         }
 
         .step.visible {
             opacity: 1;
+            -webkit-animation: slideIn 0.8s ease-out;
             animation: slideIn 0.8s ease-out;
         }
 
@@ -269,7 +238,8 @@
             overflow: hidden;
             text-transform: uppercase;
             letter-spacing: 2px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease, -webkit-transform 0.3s ease, box-shadow 0.3s ease;
+            will-change: transform;
         }
 
         .download-button::before {
@@ -281,16 +251,18 @@
             height: 0;
             background: rgba(255, 255, 255, 0.3);
             border-radius: 50%;
+            -webkit-transform: translate(-50%, -50%);
             transform: translate(-50%, -50%);
             transition: width 0.6s ease, height 0.6s ease;
         }
 
-        .download-button:hover::before {
+        .download-button:hover::before, .download-button:focus::before {
             width: 300px;
             height: 300px;
         }
 
         .download-button:hover, .download-button:focus {
+            -webkit-transform: translateY(-5px);
             transform: translateY(-5px);
             box-shadow: 0 0 30px rgba(0, 183, 235, 0.8);
         }
@@ -301,6 +273,8 @@
             background: #1a1a1a;
             font-size: 0.9rem;
             font-weight: 300;
+            color: #FF0000;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
             border-top: 2px solid #00B7EB;
         }
 
@@ -308,6 +282,7 @@
             text-align: center;
             padding: 20px 0;
             font-size: 1rem;
+            color: #FFFFFF;
         }
 
         .contact a {
@@ -320,6 +295,12 @@
         .contact a:hover, .contact a:focus {
             color: #FFFFFF;
             text-shadow: 0 0 10px rgba(0, 183, 235, 0.7);
+        }
+
+        .made-by {
+            font-size: 0.9rem;
+            font-weight: 300;
+            margin-top: 10px;
         }
 
         @keyframes typing {
@@ -337,13 +318,13 @@
         }
 
         @keyframes slideIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; -webkit-transform: translateY(30px); transform: translateY(30px); }
+            to { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
         }
 
         @keyframes glow {
             0%, 100% { opacity: 0; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.3; }
         }
 
         @media (max-width: 768px) {
@@ -352,10 +333,9 @@
                 letter-spacing: 4px;
             }
 
-            .logo-placeholder {
+            .logo {
                 width: 100px;
                 height: 100px;
-                font-size: 14px;
             }
 
             .nav-links {
@@ -387,7 +367,7 @@
                 padding: 15px 40px;
             }
 
-            .disclaimer, .contact {
+            .disclaimer, .contact, .made-by {
                 font-size: 0.8rem;
             }
         }
@@ -397,10 +377,9 @@
                 font-size: 2rem;
             }
 
-            .logo-placeholder {
+            .logo {
                 width: 80px;
                 height: 80px;
-                font-size: 12px;
             }
 
             .nav-links {
@@ -417,7 +396,8 @@
 <body>
     <nav>
         <div class="container nav-container">
-            <div class="logo-placeholder">Add Logo<br>(Replace with <img src="logo.png" style="width:100%;height:100%;">)</div>
+            <img src="VSHOCK.png" alt="V-SHOCK Tuning Logo" class="logo" onerror="this.style.display='none';this.nextSibling.style.display='block';">
+            <div style="display:none;width:120px;height:120px;background:#1a1a1a;border:2px solid #00B7EB;color:#FFFFFF;font-size:16px;font-weight:300;display:flex;align-items:center;justify-content:center;text-align:center;">Logo Failed to Load</div>
             <div class="nav-links" role="navigation" aria-label="Main navigation">
                 <a href="#home" aria-label="Home section">Home</a>
                 <a href="#engines" aria-label="Supported engines section">Engines</a>
@@ -500,10 +480,20 @@
     <section class="contact">
         <div class="container">
             <p>Contact: <a href="mailto:muminoviced@gmail.com" aria-label="Email V-SHOCK Tuning">muminoviced@gmail.com</a></p>
+            <p class="made-by">Made by Edin Muminovic</p>
         </div>
     </section>
 
     <script>
+        // Intersection Observer Polyfill for older Safari
+        (function() {
+            if (!('IntersectionObserver' in window)) {
+                var script = document.createElement('script');
+                script.src = 'https://polyfill.io/v3/polyfill.min.js?features=IntersectionObserver';
+                document.head.appendChild(script);
+            }
+        })();
+
         // Smooth scrolling
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
